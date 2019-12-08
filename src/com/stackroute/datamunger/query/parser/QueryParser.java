@@ -105,58 +105,59 @@ public class QueryParser {
 		return ar;
 	}
 	public List<String> extractField(String queryString) {
-		final List<String> field = new ArrayList<String>();
-		final String file1 = queryString;
-		final int indexOfselect = file1.indexOf("select ");
-		final int indexOffrom1 = file1.indexOf(" from");
-		String filename1 = file1.substring(indexOfselect + 7, indexOffrom1);
-		final String[] fields = filename1.split(",");
+		List<String> field = new ArrayList<String>();
+		String file1 = queryString;
+		int index1 = file1.indexOf("select ");
+		int index2 = file1.indexOf(" from");
+		String filename1 = file1.substring(index1 + 7, index2);
+		String[] fields = filename1.split(",");
 		for (int i = 0; i < fields.length; i++) {
 			field.add(fields[i]);
 		}
 		return field;
 	}
+	
 	public List<Restriction> extractConditions(String queryString) {
-		List<Restriction> conditions = null;
+		List<Restriction> result = null;
 		
-		String[] whereQuery;
+		String[] query1;
 		
-		String tempString;
-		String[] conditionQuery;
-		String[] getCondition = null;
+		String temp;
+		String[] query2;
+		String[] query3 = null;
 		if (queryString.contains("where")) {
-			conditions = new ArrayList<Restriction>();
-			whereQuery = queryString.trim().split("where ");
-			if (whereQuery[1].contains("group by")) {
-				conditionQuery = whereQuery[1].trim().split("group by");
-				tempString = conditionQuery[0];
-			} else if (whereQuery[1].contains("order by")) {
-				conditionQuery = whereQuery[1].trim().split("order by");
-				tempString = conditionQuery[0];
+			result = new ArrayList<Restriction>();
+			query1 = queryString.trim().split("where ");
+			if (query1[1].contains("group by")) {
+				query2 = query1[1].trim().split("group by");
+				temp = query2[0];
+			} else if (query1[1].contains("order by")) {
+				query2 = query1[1].trim().split("order by");
+				temp = query2[0];
 			} else {
-				tempString = whereQuery[1];
+				temp = query1[1];
 			}
-			getCondition = tempString.trim().split(" and | or ");
+			query3 = temp.trim().split(" and | or ");
 			
-			String[] condSplit = null;
-			if (getCondition != null) {
-				for (int i = 0; i < getCondition.length; i++) {
-					if (getCondition[i].contains("=")) {
-						condSplit = getCondition[i].trim().split("\\W+");
-						conditions.add(new Restriction(condSplit[0], condSplit[1], "="));
-					} else if (getCondition[i].contains(">")) {
-						condSplit = getCondition[i].trim().split("\\W+");
-						conditions.add(new Restriction(condSplit[0], condSplit[1], ">"));
-					} else if (getCondition[i].contains("<")) {
-						condSplit = getCondition[i].trim().split("\\W+");
-						conditions.add(new Restriction(condSplit[0], condSplit[1], "<"));
+			String[] opr = null;
+			if (query3 != null) {
+				for (int i = 0; i < query3.length; i++) {
+					if (query3[i].contains("=")) {
+						opr = query3[i].trim().split("\\W+");
+						result.add(new Restriction(opr[0], opr[1], "="));
+					} else if (query3[i].contains(">")) {
+						opr = query3[i].trim().split("\\W+");
+						result.add(new Restriction(opr[0], opr[1], ">"));
+					} else if (query3[i].contains("<")) {
+						opr = query3[i].trim().split("\\W+");
+						result.add(new Restriction(opr[0], opr[1], "<"));
 					}
 
 				}
 			}
 			
 		}
-		return conditions;
+		return result;
 
 	}
 	
