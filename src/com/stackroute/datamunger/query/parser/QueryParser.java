@@ -1,4 +1,5 @@
 package com.stackroute.datamunger.query.parser;
+import java.util.*;
 
 /*There are total 4 DataMungerTest file:
  * 
@@ -30,10 +31,161 @@ public class QueryParser {
 	 * QueryParameter class
 	 */
 	public QueryParameter parseQuery(String queryString) {
-
-		return queryParameter;
+		queryParameter.setFileName(fileName(queryString));
+		queryParameter.setBaseQuery(baseQuery(queryString));
+		queryParameter.setGroupByFields(groupByFields(queryString));
+		queryParameter.setOrderByFields(orderByFields(queryString));
+		queryParameter.setLogicalOperators(logicalOperators(queryString));
+    	queryParameter.setAggregateFunctions(aggregateFunctions(queryString));
+		queryParameter.setFields(extractField(queryString));
+		queryParameter.setRestrictions(extractConditions(queryString));
+		
+		
+			return queryParameter;
 	}
+	
+	public String fileName(String queryString) {
+		int index=0;
+		String arr[]=queryString.split(" ");
+		for(int i=0;i<arr.length;i++) {
+			if(arr[i].equals("from"))
+			index=i;
+		}
+		String name=arr[index+1];
 
+		return name;
+	}
+	public String baseQuery(String queryString) {
+		int pos1=queryString.indexOf("from") +5;
+		int pos2 = queryString.indexOf(" ",pos1);
+        if(pos2 == -1)
+            pos2 = queryString.length();
+            
+        
+        queryString = queryString.substring(0,pos2);
+
+		return queryString;
+	}
+	public List<String> groupByFields(String queryString) {
+		queryString=queryString.toLowerCase();
+		if (!queryString.contains("group by")) {
+			return null;
+		}
+		String [] arr = queryString.split("group by | order by")[1].trim().split(" ");
+         List<String> list = new ArrayList<String>(arr.length);
+         for (String s:arr) {
+         list.add( s );
+        } 
+     return list;
+	}
+	public List<String> orderByFields(String queryString) {
+		if (!queryString.contains("order by")) {
+			return null;
+		}
+		String [] arr = queryString.split("order by")[1].trim().split(" ");
+		List<String> list = new ArrayList<String>(arr.length);
+        for (String s:arr) {
+        list.add( s );
+       } 
+    return list;
+        
+	}
+	public List<String> logicalOperators(String queryString) {
+		int pos=queryString.indexOf("where");
+		if(pos==-1) {
+			return null;
+		}
+		String arr[]=queryString.split(" ");
+		ArrayList<String> ar= new ArrayList<String>();
+		for(int i=0;i<arr.length;i++) {
+			if(arr[i].equals("and")|| arr[i].equals("or")) {
+				ar.add(arr[i]);
+			}
+		}
+		return ar;
+	}
+	public List<String> extractField(String queryString) {
+		final List<String> field = new ArrayList<String>();
+		final String file1 = queryString;
+		final int indexOfselect = file1.indexOf("select ");
+		final int indexOffrom1 = file1.indexOf(" from");
+		String filename1 = file1.substring(indexOfselect + 7, indexOffrom1);
+		final String[] fields = filename1.split(",");
+		for (int i = 0; i < fields.length; i++) {
+			field.add(fields[i]);
+		}
+		return field;
+	}
+	public List<Restriction> extractConditions(String queryString) {
+		List<Restriction> conditions = null;
+		
+		String[] whereQuery;
+		
+		String tempString;
+		String[] conditionQuery;
+		String[] getCondition = null;
+		if (queryString.contains("where")) {
+			conditions = new ArrayList<Restriction>();
+			whereQuery = queryString.trim().split("where ");
+			if (whereQuery[1].contains("group by")) {
+				conditionQuery = whereQuery[1].trim().split("group by");
+				tempString = conditionQuery[0];
+			} else if (whereQuery[1].contains("order by")) {
+				conditionQuery = whereQuery[1].trim().split("order by");
+				tempString = conditionQuery[0];
+			} else {
+				tempString = whereQuery[1];
+			}
+			getCondition = tempString.trim().split(" and | or ");
+			
+			String[] condSplit = null;
+			if (getCondition != null) {
+				for (int i = 0; i < getCondition.length; i++) {
+					if (getCondition[i].contains("=")) {
+						condSplit = getCondition[i].trim().split("\\W+");
+						conditions.add(new Restriction(condSplit[0], condSplit[1], "="));
+					} else if (getCondition[i].contains(">")) {
+						condSplit = getCondition[i].trim().split("\\W+");
+						conditions.add(new Restriction(condSplit[0], condSplit[1], ">"));
+					} else if (getCondition[i].contains("<")) {
+						condSplit = getCondition[i].trim().split("\\W+");
+						conditions.add(new Restriction(condSplit[0], condSplit[1], "<"));
+					}
+
+				}
+			}
+			
+		}
+		return conditions;
+
+	}
+	
+	
+    public List<AggregateFunction> aggregateFunctions(String queryString) {
+    	
+    			 List<AggregateFunction> agg = new ArrayList<AggregateFunction>();
+    			 int index1 = queryString.toLowerCase().indexOf("select");
+    			 int index2 = queryString.toLowerCase().indexOf(" from");
+    			 String query = queryString.toLowerCase().substring(index1 + 7, index2);
+    			String[] arr = null;
+    			arr = query.split(",");
+    			for (int i = 0; i < arr.length; i++) {
+    				if (arr[i].startsWith("max(") && arr[i].endsWith(")")
+    						|| arr[i].startsWith("min(") && arr[i].endsWith(")")
+    						|| arr[i].startsWith("avg(") && arr[i].endsWith(")")
+    						|| arr[i].startsWith("sum") && arr[i].endsWith(")")) {
+    					agg.add(new AggregateFunction(arr[i].substring(4, arr[i].length() - 1),
+    							arr[i].substring(0, 3)));
+    					
+    				} else if (arr[i].startsWith("count(") && arr[i].endsWith(")")) {
+    					agg.add(new AggregateFunction(arr[i].substring(6, arr[i].length() - 1),
+    							arr[i].substring(0, 5)));
+    					
+    				}
+
+    			}
+    			return agg;	}
+	
 	/*
 	 * Extract the name of the file from the query. File name can be found after the
 	 * "from" clause.

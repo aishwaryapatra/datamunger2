@@ -1,5 +1,6 @@
 package com.stackroute.datamunger.query.parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /* 
@@ -9,36 +10,82 @@ import java.util.List;
  * */
 
 public class QueryParameter {
-
+	private String queryString;
+	private String file;
+	private String baseQuery;
+	private List<String> fields;
+	private String QUERY_TYPE;
+	private List<Restriction> restriction;
+	private List<String> logicalOperators;
+	private List<AggregateFunction> aggregateFunctions;
+	private List<String> orderByFields;
+	private List<String> groupByFields;
+	
+	public void setQueryString( String queryString) {
+		this.queryString=queryString;
+	}
+	public String getQueryString() {
+		return queryString;
+	}
+	
 	public String getFileName() {
-		return null;
+
+		return this.file;
+	}
+	public void setFileName(String file) {
+		this.file=file;
 	}
 
 	public String getBaseQuery() {
-		return null;
+
+		return this.baseQuery;
+	}
+	public void setBaseQuery(String baseQuery) {
+		this.baseQuery=baseQuery;
 	}
 
 	public List<Restriction> getRestrictions() {
-		return null;
+		return this.restriction;
+	}
+	public void setRestrictions(List<Restriction> restriction) {
+		this.restriction=restriction;
 	}
 
 	public List<String> getLogicalOperators() {
-		return null;
+		return this.logicalOperators;
 	}
+	public void setLogicalOperators(List<String> logicalOperators) {
+		this.logicalOperators=logicalOperators;
+	}
+	
 
 	public List<String> getFields() {
-		return null;
+		return this.fields;
+	}
+	public void setFields(List<String> fields) {
+		this.fields=fields;
 	}
 
 	public List<AggregateFunction> getAggregateFunctions() {
-		return null;
+		return this.aggregateFunctions;
+	}
+	public void setAggregateFunctions(List<AggregateFunction> aggregateFunctions) {
+		this.aggregateFunctions=aggregateFunctions;
 	}
 
 	public List<String> getGroupByFields() {
-		return null;
+     
+     return this.groupByFields;
+		
 	}
-
+	
+	public void setGroupByFields(List<String> groupByFields) {
+		this.groupByFields = groupByFields;
+	}
 	public List<String> getOrderByFields() {
-		return null;
+	     return this.orderByFields;
+	}
+	public void setOrderByFields(List<String> orderByFields) {
+		this.orderByFields = orderByFields;
 	}
 }
